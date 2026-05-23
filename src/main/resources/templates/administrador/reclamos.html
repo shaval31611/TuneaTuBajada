@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrador || Usuarios</title>
+    <link rel="shortcut icon" href="/img/estadisticas/img-5.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/bootstrap/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+
+<body class="overflow-hidden">
+
+    <div class="fixed  w-screen">
+        <!-- header -->
+        <div th:replace="~{/fragmentos/administrador/header :: div}"></div>
+
+        <!-- body -->
+        <div class="flex justify-between">
+            <!-- menu lateral -->
+            <div th:replace="~{/fragmentos/administrador/menu_lateral :: div}"></div>
+            <!-- body main -->
+            <div class="main_dashboard w-screen h-screen mt-4  overflow-y-auto ml-6 mr-6">
+                <div class="mt-4 cards_flex flex gap-4  justify-center w-full flex-wrap">
+                    <div class="w-64 h-24 border-sm rounded shadow-[0px_1px_6px_6px_rgba(10,0,0,0.05)]" >
+                        <div class="flex justify-between w-ful p-5">
+                            <div class="">
+                                <span class="block text-xl">usuarios</span>
+                                <span class="text-sm">123</span>
+                            </div>
+                            <div class="text-5xl ">
+                                <img src="/img/estadisticas/img-1.png" alt="" class="w-12 h-12">
+                              </div>
+                        </div>
+                    </div>
+                    <div class="w-64 h-24 border-sm rounded shadow-[0px_1px_6px_6px_rgba(10,0,0,0.05)]" >
+                        <div class="flex justify-between w-ful p-5">
+                            <div class="">
+                                <span class="block text-xl">administradores</span>
+                                <span class="text-sm">4</span>
+                            </div>
+                            <div class="text-5xl ">
+                                <img src="/img/estadisticas/img-1.png" alt="" class="w-12 h-12">
+                              </div>
+                        </div>
+                    </div>
+                    <div class="w-64 h-24 border-sm rounded shadow-[0px_1px_6px_6px_rgba(10,0,0,0.05)]" >
+                        <div class="flex justify-between w-ful p-5">
+                            <div class="">
+                                <span class="block text-xl">compras</span>
+                                <span class="text-sm text-green-700">+ 30</span>
+                            </div>
+                            <div class="text-5xl ">
+                                <img src="/img/estadisticas/img-1.png" alt="" class="w-12 h-12">
+                              </div>
+                        </div>
+                    </div>
+                    <div class="w-64 h-24 border-sm rounded shadow-[0px_1px_6px_6px_rgba(10,0,0,0.05)]" >
+                        <div class="flex justify-between w-ful p-5">
+                            <div class="">
+                                <span class="block text-xl">Consumo</span>
+                                <span class="text-sm text-green-700 font-bold">+ S/ 6978.0</span>
+                            </div>
+                            <div class="text-5xl ">
+                                <img src="/img/estadisticas/img-6.png" alt="" class="w-12 h-12">
+                              </div>
+                        </div>
+                    </div>                    
+                </div>
+                <div class="w-full border border_color  p-6 shadow-inner rounded overflow-y-auto mt-4">
+                        <div class="flex justify-between flex-wrap mb-2 ">                         
+                            <a class="bg-sky-600 w-256 rounded mb-2">
+                             <div class="flex w-full mt-auto mb-auto p-1 gap-2 ">
+                                <i class="bi bi-search text-2xl text-white"></i>
+                                <input type="search" class="w-full outline-none px-2 text-gray-950 text-sm" onkeyup="buscarTabla()" id="searchInput">                               
+                             </div>
+                            </a>
+                        </div>
+                    <table class="w-full border-collapse " id="miTabla">                        
+                        <thead>
+                            <tr class="border-b-2 border_color text-center font-bold">
+                                <td class="p-4  ">
+                                    <div class="flex ">
+                                        <span>codigo</span> <i class="bi bi-chevron-expand"></i>
+                                    </div>
+                                </td>
+                                <td class="p-4 ">
+                                    <div class="flex"><span>id usuario</span> <i class="bi bi-chevron-expand"></i></div>
+                                </td>
+                                <td class="p-4 ">
+                                    <div class="flex"><span>motivo</span> <i class="bi bi-chevron-expand"></i>
+                                    </div>
+                                </td>
+                                <td class="p-4 ">
+                                    <div class="flex">
+                                        <span>descripcion</span> <i class="bi bi-chevron-expand"></i>
+                                    </div>
+                                </td>
+                                <td class="p-4 ">
+                                    <div class="flex"><span>estado</span> <i class="bi bi-chevron-expand"></i>
+                                    </div>
+                                </td>
+                                <td class="p-4 ">
+                                    <div class="flex"><span>respuesta</span> <i class="bi bi-chevron-expand"></i>
+                                    </div>
+                                </td>
+                                <td class="p-4 ">
+                                    <div class="flex"><span>accion</span> <i class="bi bi-chevron-expand"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody th:each="listaReclamos : ${listaReclamos}">
+ 
+
+                            <tr class="border-b border_color  text-sm">
+                                <td class="p-4" th:text="${listaReclamos.id_reclamo}"></td>
+                                <td class="p-4" th:text="${listaReclamos.id_usuario}"></td>
+                                <td class="p-4"th:text="${listaReclamos.motivo}"></td>
+                                <td class="p-4" th:text="${listaReclamos.descripcion}"></td>
+                                <td class="p-4" th:text="${listaReclamos.id_estado_mensaje}"></td>
+                                <td class="p-4" th:text="${listaReclamos.respuesta}">
+                                    <!--  th:href="@{/administrador/editar/usuario/{id_usuario}(id_usuario=${listaUsuario.id_usuario})}" -->
+                                </td>
+                                <td>
+                                    <a  th:href="@{/administrador/responder/reclamo/{id_reclamo}(id_reclamo=${listaReclamos.id_reclamo})}"  class=" cursor-pointer rounded  px-4 shadow-sm py-2 border bg-orange-600 text-white hover:bg-orange-900"><i class="bi bi-pencil-square"></i></a>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <br> <br> <br> <br> <br>
+            </div>
+        </div>
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/modal.js"></script>
+</body>
+
+</html> 

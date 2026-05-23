@@ -1,0 +1,30 @@
+<div class="header   bg-white">
+    <div class="w-full flex justify-between px-4 py-4 border shadow-md">
+        <div class="text-lg mt-auto mb-auto">
+            <a href="/" class="flex gap-2"><img class="w-12" src="/img/estadisticas/img-5.png" alt=""> <span class="mb-auto mt-auto">Tunea tu Bajada</span> </a>
+        </div>
+        <div class="flex gap-4  mt-auto mb-auto">
+            <div class="menu_page flex gap-6  mt-auto mb-auto text-sm">
+                <a href="/">Inicio</a>
+                <a href="/cliente/productos">Productos</a>
+                <a href="/cliente/personalizar">🍔 Personalizar</a>
+                <a href="/nosotros">Sobre Nosotros</a>
+                <a href="/cliente/compras" th:unless="${session.IdUsuario == null}">Mis Compras</a>
+            </div>
+            <div class="usuario_sesion flex gap-4  mt-auto mb-auto" th:if="${session.IdUsuario == null}">
+                <a href="/cliente/login" class="button-6 text-sm">Iniciar sesion</a>
+                <a href="/cliente/registrar" class="button-6 text-sm" >Registrate</a>
+            </div>
+      
+            <div class=" usuario_sesion flex gap-2  mt-auto mb-auto" th:unless="${session.IdUsuario == null}">
+                <a  class="button-6 text-sm" th:text="${session.NombreUsuario}"></a>                         
+            </div>
+            <div class="flex  mt-auto mb-auto" th:unless="${session.IdUsuario == null}">
+                <a href="/autenticacion/logout" class="text-3xl mt-auto mb-auto text-red-600 font-bold"><i class="bi bi-box-arrow-left"></i></a>
+            </div>
+            <div class="flex gap-4  mt-auto mb-auto">
+                <a id="buttom_barra_lateral" class="icon-bar text-2xl mt-auto mb-auto border rounded shadow-sm px-2"><i class="bi bi-list "></i></a>
+            </div>
+        </div>
+    </div>
+</div>

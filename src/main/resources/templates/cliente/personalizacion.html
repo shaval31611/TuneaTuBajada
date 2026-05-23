@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personaliza tu Hamburguesa – Tunea tu Bajada</title>
+    <link rel="shortcut icon" href="/img/estadisticas/img-5.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/alerta.css">
+    <link rel="stylesheet" href="/bootstrap/bootstrap-icons/bootstrap-icons.css">
+    <style>
+        /* ===================== VARIABLES ===================== */
+        :root {
+            --naranja:  #FF8B47;
+            --naranja-d: #B56233;
+            --marron:  #7C3B1A;
+            --crema:   #FFF8F0;
+            --gris:    #F3F3F3;
+        }
+
+        body { background: var(--crema); }
+
+        /* ===================== LAYOUT SPLIT ===================== */
+        .burger-layout {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 3rem;
+        }
+        @media(max-width: 900px){
+            .burger-layout { grid-template-columns: 1fr; }
+        }
+
+        /* ===================== PANEL INGREDIENTES ===================== */
+        .panel-ingredientes {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,.06);
+        }
+        .panel-titulo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--marron);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--naranja);
+            padding-bottom: .5rem;
+        }
+
+        /* Tabs de categoría */
+        .tabs-cat { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+        .tab-btn {
+            padding: .35rem .9rem;
+            border-radius: 20px;
+            font-size: .8rem;
+            font-weight: 600;
+            background: var(--gris);
+            color: #555;
+            border: none;
+            cursor: pointer;
+            transition: .2s;
+        }
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--naranja);
+            color: #fff;
+        }
+
+        /* Grid de ingredientes disponibles */
+        .ing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: .75rem;
+        }
+        .ing-card {
+            background: var(--gris);
+            border: 2px solid transparent;
+            border-radius: .75rem;
+            padding: .6rem .5rem;
+            text-align: center;
+            cursor: grab;
+            transition: .2s;
+            user-select: none;
+            position: relative;
+        }
+        .ing-card:hover { border-color: var(--naranja); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,139,71,.25); }
+        .ing-card.dragging { opacity: .45; }
+        .ing-card img { width: 52px; height: 52px; object-fit: contain; margin: 0 auto .3rem; display: block; }
+        .ing-card .ing-nombre { font-size: .72rem; font-weight: 600; color: #333; line-height: 1.2; }
+        .ing-card .ing-precio { font-size: .68rem; color: var(--naranja-d); font-weight: 700; margin-top: .15rem; }
+        .ing-card .ing-stock-badge {
+            position: absolute; top: 4px; right: 4px;
+            font-size: .55rem; background: #e7f5ea; color: #2a7a3b;
+            border-radius: 10px; padding: 1px 5px;
+        }
+        .ing-card.agotado { opacity: .45; cursor: not-allowed; }
+
+        /* Botones +/- rápidos */
+        .ing-card .quick-add {
+            display: flex; align-items: center; justify-content: center; gap: .3rem;
+            margin-top: .4rem;
+        }
+        .quick-add button {
+            width: 22px; height: 22px; border-radius: 50%;
+            border: none; font-size: .9rem; font-weight: 700;
+            cursor: pointer; line-height: 1;
+            transition: .15s;
+        }
+        .quick-add .btn-minus { background: #fce8da; color: var(--naranja-d); }
+        .quick-add .btn-plus  { background: var(--naranja); color: #fff; }
+        .quick-add .btn-minus:hover { background: var(--naranja-d); color: #fff; }
+        .quick-add .btn-plus:hover  { background: var(--naranja-d); }
+        .quick-add .qty-label { font-size: .8rem; font-weight: 700; min-width: 16px; text-align: center; }
+
+        /* ===================== ZONA DROP ===================== */
+        .zona-drop {
+            min-height: 80px;
+            border: 2px dashed #ddd;
+            border-radius: .75rem;
+            padding: .75rem;
+            margin-bottom: 1rem;
+            transition: .2s;
+            background: #fafafa;
+        }
+        .zona-drop.drag-over { border-color: var(--naranja); background: #fff5ed; }
+        .zona-drop-label { font-size: .75rem; color: #aaa; text-align: center; padding: .5rem 0; }
+
+        /* Chips de ingredientes seleccionados */
+        .ing-chip {
+            display: inline-flex; align-items: center; gap: .35rem;
+            background: var(--naranja); color: #fff;
+            border-radius: 20px; padding: .25rem .65rem;
+            font-size: .75rem; font-weight: 600;
+            margin: .2rem;
+            animation: popIn .2s ease;
+        }
+        .ing-chip .chip-qty { background: rgba(0,0,0,.18); border-radius: 10px; padding: 0 5px; font-size: .7rem; }
+        .ing-chip button { background: none; border: none; color: #fff; cursor: pointer; font-size: .85rem; line-height: 1; padding: 0; }
+        @keyframes popIn { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* ===================== PANEL DERECHO (preview + resumen) ===================== */
+        .panel-preview {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,.06);
+            position: sticky;
+            top: 80px;
+        }
+
+        /* Stack visual hamburguesa */
+        .burger-stack {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 1rem;
+        }
+        .burger-stack .layer {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            transition: all .4s cubic-bezier(.34,1.56,.64,1);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,.18));
+        }
+        /* Posiciones fijas de capas */
+        .layer-pan-top    { bottom: 158px; z-index: 10; }
+        .layer-carne      { bottom: 120px; z-index: 8; }
+        .layer-queso      { bottom: 104px; z-index: 7; }
+        .layer-lechuga    { bottom: 96px;  z-index: 6; }
+        .layer-tomate     { bottom: 82px;  z-index: 5; }
+        .layer-cebolla    { bottom: 68px;  z-index: 4; }
+        .layer-pepinillos { bottom: 58px;  z-index: 3; }
+        .layer-pan-bot    { bottom: 40px;  z-index: 2; }
+        .layer-default    { bottom: 30px;  z-index: 1; }
+
+        /* Placeholder vacío */
+        .burger-placeholder {
+            width: 160px; height: 100px;
+            margin: 0 auto;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #ccc; font-size: .8rem; gap: .5rem;
+        }
+        .burger-placeholder i { font-size: 2.5rem; }
+
+        /* Resumen de precio */
+        .precio-resumen {
+            background: var(--gris);
+            border-radius: .75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .precio-row { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: .3rem; color: #555; }
+        .precio-row.total { font-weight: 800; font-size: 1rem; color: var(--marron); border-top: 1px solid #ddd; padding-top: .5rem; margin-top: .3rem; }
+
+        /* Lista ingredientes seleccionados */
+        .lista-seleccionados { margin-bottom: 1rem; max-height: 200px; overflow-y: auto; }
+        .sel-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: .35rem .5rem;
+            border-radius: .5rem;
+            background: var(--gris);
+            margin-bottom: .3rem;
+            font-size: .8rem;
+        }
+        .sel-item .sel-nombre { flex: 1; font-weight: 600; color: #333; }
+        .sel-item .sel-precio { color: var(--naranja-d); font-weight: 700; margin-right: .5rem; }
+        .sel-item .sel-qty-ctrl { display: flex; align-items: center; gap: .3rem; }
+        .sel-qty-ctrl button {
+            width: 20px; height: 20px; border-radius: 50%; border: none; font-size: .8rem; font-weight: 700; cursor: pointer;
+        }
+        .sel-qty-ctrl .b-m { background: #fce8da; color: var(--naranja-d); }
+        .sel-qty-ctrl .b-p { background: var(--naranja); color: #fff; }
+
+        /* Botones de acción */
+        .btn-primary {
+            display: block; width: 100%;
+            background: var(--naranja); color: #fff;
+            border: none; border-radius: .65rem;
+            padding: .75rem;
+            font-size: .95rem; font-weight: 700;
+            cursor: pointer; transition: .2s;
+            text-align: center;
+        }
+        .btn-primary:hover { background: var(--naranja-d); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(255,139,71,.4); }
+        .btn-secondary {
+            display: block; width: 100%;
+            background: #fff; color: var(--marron);
+            border: 2px solid var(--marron); border-radius: .65rem;
+            padding: .7rem;
+            font-size: .9rem; font-weight: 700;
+            cursor: pointer; transition: .2s;
+            text-align: center; margin-bottom: .5rem;
+        }
+        .btn-secondary:hover { background: var(--marron); color: #fff; }
+
+        /* Preview IA */
+        #ia-preview-img {
+            width: 100%; border-radius: .75rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,.12);
+            display: none; margin-bottom: .75rem;
+        }
+        .ia-loading {
+            width: 100%; height: 180px;
+            border-radius: .75rem; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+            display: none; margin-bottom: .75rem;
+        }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* Nombre hamburguesa */
+        #nombre-burger {
+            width: 100%; border: 2px solid #e5e5e5; border-radius: .5rem;
+            padding: .5rem .75rem; font-size: .9rem;
+            margin-bottom: .75rem; outline: none;
+            transition: .2s;
+        }
+        #nombre-burger:focus { border-color: var(--naranja); }
+
+        /* Mensaje vacío */
+        .msg-empty { text-align: center; color: #bbb; font-size: .8rem; padding: .5rem 0; }
+
+        /* Scrollbar bonito */
+        .lista-seleccionados::-webkit-scrollbar { width: 4px; }
+        .lista-seleccionados::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .lista-seleccionados::-webkit-scrollbar-thumb { background: var(--naranja); border-radius: 4px; }
+
+        /* Responsive ajustes */
+        @media(max-width: 640px){
+            .ing-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+            .panel-preview { position: static; }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{/fragmentos/cliente/header :: div}"></div>
+
+    <div class="burger-layout">
+
+        <!-- ========== PANEL IZQUIERDO: INGREDIENTES ========== -->
+        <div>
+            <div class="panel-ingredientes">
+                <h2 class="panel-titulo"><i class="bi bi-sliders me-1"></i> Elige tus ingredientes</h2>
+
+                <!-- Tabs categoría -->
+                <div class="tabs-cat" id="tabs-cat">
+                    <button class="tab-btn active" data-cat="todos">Todos</button>
+                    <button class="tab-btn" data-cat="Panes">🍞 Panes</button>
+                    <button class="tab-btn" data-cat="Carnes">🥩 Carnes</button>
+                    <button class="tab-btn" data-cat="Adicionales">🥗 Adicionales</button>
+                    <button class="tab-btn" data-cat="Bebidas">🥤 Bebidas</button>
+                </div>
+
+                <!-- Grid de ingredientes (Thymeleaf renderiza estos) -->
+                <div class="ing-grid" id="ing-grid">
+                    <!-- Renderizado desde Thymeleaf con listaProductos -->
+                    <div th:each="p : ${listaProductos}"
+                         class="ing-card"
+                         th:classappend="${p.cantidad_stock <= 0} ? 'agotado' : ''"
+                         th:attr="
+                            data-id=${p.id_producto},
+                            data-nombre=${p.nombre_producto},
+                            data-precio=${p.precio_unidad},
+                            data-stock=${p.cantidad_stock},
+                            data-cat=${#strings.isEmpty(p.id_categoria) ? 'Otros' : ''},
+                            draggable=${p.cantidad_stock > 0 ? 'true' : 'false'}"
+                         th:data-cat="${catMap != null ? catMap[p.id_categoria] : 'Otros'}">
+
+                        <span class="ing-stock-badge" th:text="${p.cantidad_stock > 0 ? p.cantidad_stock : 'Agotado'}"></span>
+                        <img th:src="${p.img_url}" th:alt="${p.nombre_producto}" onerror="this.src='https://placehold.co/52x52/FFE5D0/B56233?text=🍔'">
+                        <div class="ing-nombre" th:text="${p.nombre_producto}"></div>
+                        <div class="ing-precio" th:text="'S/ ' + ${p.precio_unidad}"></div>
+                        <div class="quick-add" th:if="${p.cantidad_stock > 0}">
+                            <button class="btn-minus" onclick="cambiarCantidadGrid(this, -1)">−</button>
+                            <span class="qty-label">0</span>
+                            <button class="btn-plus" onclick="cambiarCantidadGrid(this, +1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ZONA DROP (alternativa drag & drop) -->
+                <div style="margin-top: 1.5rem;">
+                    <p class="panel-titulo" style="font-size:.9rem; margin-bottom:.5rem;"><i class="bi bi-arrow-down-circle"></i> Zona de Armado (Drag & Drop)</p>
+                    <div class="zona-drop" id="zona-drop">
+                        <p class="zona-drop-label" id="zona-drop-label">Arrastra ingredientes aquí para agregarlos</p>
+                        <div id="zona-drop-chips"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== PANEL DERECHO: PREVIEW + RESUMEN ========== -->
+        <div>
+            <div class="panel-preview">
+                <h2 class="panel-titulo"><i class="bi bi-eye me-1"></i> Tu Hamburguesa</h2>
+
+                <!-- Nombre personalizado -->
+                <input type="text" id="nombre-burger" placeholder="Dale un nombre a tu burger... 🍔" maxlength="40">
+
+                <!-- Stack visual -->
+                <div class="burger-stack" id="burger-stack">
+                    <!-- capas se insertan aquí por JS -->
+                    <div class="burger-placeholder" id="burger-placeholder">
+                        <i class="bi bi-stack"></i>
+                        <span>¡Agrega ingredientes!</span>
+                    </div>
+                </div>
+
+                <!-- Preview IA (DALL·E) -->
+                <div class="ia-loading" id="ia-loading"></div>
+                <img id="ia-preview-img" alt="Preview IA de tu hamburguesa">
+                <button class="btn-secondary" id="btn-ia-preview" onclick="generarPreviewIA()">
+                    <i class="bi bi-magic"></i> Generar vista IA
+                </button>
+
+                <!-- Lista ingredientes seleccionados -->
+                <p class="panel-titulo" style="font-size:.85rem; margin-bottom:.5rem;">Ingredientes seleccionados</p>
+                <div class="lista-seleccionados" id="lista-seleccionados">
+                    <p class="msg-empty" id="msg-empty">Ningún ingrediente aún</p>
+                </div>
+
+                <!-- Resumen de precio -->
+                <div class="precio-resumen">
+                    <div class="precio-row"><span>Subtotal</span><span id="txt-subtotal">S/ 0.00</span></div>
+                    <div class="precio-row"><span>IGV (18%)</span><span id="txt-igv">S/ 0.00</span></div>
+                    <div class="precio-row total"><span>TOTAL</span><span id="txt-total">S/ 0.00</span></div>
+                </div>
+
+                <!-- Acciones -->
+                <button class="btn-primary" id="btn-agregar-carrito" onclick="agregarBurgerAlCarrito()">
+                    <i class="bi bi-bag-plus"></i> Agregar al carrito
+                </button>
+                <br>
+                <button class="btn-secondary" onclick="resetBurger()" style="margin-top:.5rem;">
+                    <i class="bi bi-arrow-counterclockwise"></i> Reiniciar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fragmento footer -->
+    <div th:replace="~{/fragmentos/cliente/footer :: div}"></div>
+
+    <!-- ============================================================ JAVASCRIPT ============================================================ -->
+    <script>
+    // ── Estado global ─────────────────────────────────────────────────────────────────────
+    const seleccionados = {};   // { id: { nombre, precio, qty, cat, img } }
+    const PRECIO_BASE = 0;      // Precio base hamburguesa (pan incluido si es 0)
+
+    // ── Emojis / capas visuales por categoría ────────────────────────────────────────────
+    const LAYER_MAP = {
+        'panes':      { class: 'layer-pan-top',    emoji: '🍞' },
+        'carnes':     { class: 'layer-carne',       emoji: '🥩' },
+        'queso':      { class: 'layer-queso',       emoji: '🧀' },
+        'lechuga':    { class: 'layer-lechuga',     emoji: '🥬' },
+        'tomate':     { class: 'layer-tomate',      emoji: '🍅' },
+        'cebolla':    { class: 'layer-cebolla',     emoji: '🧅' },
+        'pepinillos': { class: 'layer-pepinillos',  emoji: '🥒' },
+        'adicionales':{ class: 'layer-default',     emoji: '🥗' },
+        'bebidas':    { class: 'layer-default',     emoji: '🥤' },
+        'default':    { class: 'layer-default',     emoji: '🔸' },
+    };
+
+    // ── TABS de categoría ────────────────────────────────────────────────────────────────
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const cat = btn.dataset.cat;
+            document.querySelectorAll('.ing-card').forEach(card => {
+                const cardCat = card.dataset.cat || '';
+                card.style.display = (cat === 'todos' || cardCat === cat) ? '' : 'none';
+            });
+        });
+    });
+
+    // ── DRAG & DROP ──────────────────────────────────────────────────────────────────────
+    document.querySelectorAll('.ing-card:not(.agotado)').forEach(card => {
+        card.addEventListener('dragstart', e => {
+            card.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', card.dataset.id);
+        });
+        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+    });
+
+    const zonaDrop = document.getElementById('zona-drop');
+    zonaDrop.addEventListener('dragover', e => { e.preventDefault(); zonaDrop.classList.add('drag-over'); });
+    zonaDrop.addEventListener('dragleave', () => zonaDrop.classList.remove('drag-over'));
+    zonaDrop.addEventListener('drop', e => {
+        e.preventDefault();
+        zonaDrop.classList.remove('drag-over');
+        const id = e.dataTransfer.getData('text/plain');
+        const card = document.querySelector(`.ing-card[data-id="${id}"]`);
+        if (card) agregarIngrediente(card);
+    });
+
+    // ── FUNCIONES PRINCIPALES ────────────────────────────────────────────────────────────
+    function agregarIngrediente(card) {
+        const id     = card.dataset.id;
+        const nombre = card.dataset.nombre;
+        const precio = parseFloat(card.dataset.precio) || 0;
+        const cat    = (card.dataset.cat || 'default').toLowerCase();
+        const img    = card.querySelector('img')?.src || '';
+
+        if (seleccionados[id]) {
+            seleccionados[id].qty++;
+        } else {
+            seleccionados[id] = { nombre, precio, qty: 1, cat, img };
+        }
+        sincronizarGridQty(id);
+        renderListaSeleccionados();
+        renderBurgerStack();
+        calcularPrecio();
+    }
+
+    function cambiarCantidadGrid(btn, delta) {
+        const card = btn.closest('.ing-card');
+        if (!card || card.classList.contains('agotado')) return;
+        const id = card.dataset.id;
+
+        if (delta > 0) {
+            agregarIngrediente(card);
+        } else {
+            // restar
+            if (seleccionados[id]) {
+                seleccionados[id].qty--;
+                if (seleccionados[id].qty <= 0) delete seleccionados[id];
+            }
+            sincronizarGridQty(id);
+            renderListaSeleccionados();
+            renderBurgerStack();
+            calcularPrecio();
+        }
+    }
+
+    function sincronizarGridQty(id) {
+        const card = document.querySelector(`.ing-card[data-id="${id}"]`);
+        if (!card) return;
+        const label = card.querySelector('.qty-label');
+        if (label) label.textContent = seleccionados[id]?.qty || 0;
+    }
+
+    function renderListaSeleccionados() {
+        const lista = document.getElementById('lista-seleccionados');
+        const empty = document.getElementById('msg-empty');
+        const ids = Object.keys(seleccionados);
+
+        if (ids.length === 0) {
+            empty.style.display = '';
+            // limpiar excepto el mensaje vacío
+            Array.from(lista.children).forEach(c => { if (c !== empty) c.remove(); });
+            // limpiar chips zona drop
+            document.getElementById('zona-drop-chips').innerHTML = '';
+            document.getElementById('zona-drop-label').style.display = '';
+            return;
+        }
+        empty.style.display = 'none';
+        document.getElementById('zona-drop-label').style.display = 'none';
+
+        // Reconstruir lista
+        Array.from(lista.children).forEach(c => { if (c !== empty) c.remove(); });
+        const chipsContainer = document.getElementById('zona-drop-chips');
+        chipsContainer.innerHTML = '';
+
+        ids.forEach(id => {
+            const ing = seleccionados[id];
+            // item lista
+            const el = document.createElement('div');
+            el.className = 'sel-item';
+            el.innerHTML = `
+                <span class="sel-nombre">${ing.nombre}</span>
+                <span class="sel-precio">S/ ${(ing.precio * ing.qty).toFixed(2)}</span>
+                <div class="sel-qty-ctrl">
+                    <button class="b-m" onclick="cambiarQtySeleccionado('${id}',-1)">−</button>
+                    <span style="min-width:16px;text-align:center;font-size:.8rem;font-weight:700">${ing.qty}</span>
+                    <button class="b-p" onclick="cambiarQtySeleccionado('${id}',+1)">+</button>
+                </div>`;
+            lista.appendChild(el);
+
+            // chip zona drop
+            const chip = document.createElement('span');
+            chip.className = 'ing-chip';
+            chip.innerHTML = `${ing.nombre} <span class="chip-qty">×${ing.qty}</span> <button onclick="eliminarIngrediente('${id}')">×</button>`;
+            chipsContainer.appendChild(chip);
+        });
+    }
+
+    function cambiarQtySeleccionado(id, delta) {
+        if (!seleccionados[id]) return;
+        seleccionados[id].qty += delta;
+        if (seleccionados[id].qty <= 0) delete seleccionados[id];
+        sincronizarGridQty(id);
+        renderListaSeleccionados();
+        renderBurgerStack();
+        calcularPrecio();
+    }
+
+    function eliminarIngrediente(id) {
+        delete seleccionados[id];
+        sincronizarGridQty(id);
+        renderListaSeleccionados();
+        renderBurgerStack();
+        calcularPrecio();
+    }
+
+    // ── RENDER VISUAL STACK ──────────────────────────────────────────────────────────────
+    function renderBurgerStack() {
+        const stack = document.getElementById('burger-stack');
+        const placeholder = document.getElementById('burger-placeholder');
+        const ids = Object.keys(seleccionados);
+
+        // Limpiar capas previas
+        stack.querySelectorAll('.layer').forEach(l => l.remove());
+
+        if (ids.length === 0) {
+            placeholder.style.display = '';
+            return;
+        }
+        placeholder.style.display = 'none';
+
+        const positions = [30, 50, 70, 90, 110, 130, 150, 170, 190];
+        ids.slice(0,9).forEach((id, i) => {
+            const ing = seleccionados[id];
+            const layer = document.createElement('div');
+            layer.className = 'layer';
+            layer.style.bottom = positions[i] + 'px';
+            layer.style.zIndex = i + 2;
+            layer.style.fontSize = '52px';
+            layer.style.textAlign = 'center';
+
+            // Intentar usar imagen real, fallback a emoji
+            const layerKey = ing.cat || 'default';
+            const info = LAYER_MAP[layerKey] || LAYER_MAP['default'];
+
+            if (ing.img && !ing.img.includes('placehold')) {
+                const imgEl = document.createElement('img');
+                imgEl.src = ing.img;
+                imgEl.style.cssText = 'width:80px;height:40px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))';
+                layer.appendChild(imgEl);
+            } else {
+                layer.textContent = info.emoji;
+                layer.style.fontSize = '36px';
+            }
+
+            if (ing.qty > 1) {
+                const badge = document.createElement('span');
+                badge.textContent = '×' + ing.qty;
+                badge.style.cssText = 'position:absolute;top:-4px;right:-4px;background:#FF8B47;color:#fff;border-radius:10px;padding:1px 5px;font-size:.6rem;font-weight:700';
+                layer.style.position = 'absolute';
+                layer.style.left = '50%';
+                layer.style.transform = 'translateX(-50%)';
+                layer.appendChild(badge);
+            }
+            stack.appendChild(layer);
+        });
+    }
+
+    // ── CÁLCULO DE PRECIO ────────────────────────────────────────────────────────────────
+    function calcularPrecio() {
+        let subtotal = PRECIO_BASE;
+        Object.values(seleccionados).forEach(ing => { subtotal += ing.precio * ing.qty; });
+        const igv   = subtotal * 0.18;
+        const total = subtotal + igv;
+
+        document.getElementById('txt-subtotal').textContent = 'S/ ' + subtotal.toFixed(2);
+        document.getElementById('txt-igv').textContent      = 'S/ ' + igv.toFixed(2);
+        document.getElementById('txt-total').textContent    = 'S/ ' + total.toFixed(2);
+    }
+
+    // ── PREVIEW IA (DALL·E) ──────────────────────────────────────────────────────────────
+    async function generarPreviewIA() {
+        const ids = Object.keys(seleccionados);
+        if (ids.length === 0) { alert('¡Agrega al menos un ingrediente primero!'); return; }
+
+        const nombres = ids.map(id => seleccionados[id].nombre);
+        const iaImg    = document.getElementById('ia-preview-img');
+        const iaLoad   = document.getElementById('ia-loading');
+
+        iaImg.style.display   = 'none';
+        iaLoad.style.display  = 'block';
+
+        try {
+            const resp = await fetch('/api/burger/preview', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ingredients: nombres })
+            });
+            const url = await resp.text();
+            if (url && url.startsWith('http')) {
+                iaImg.src           = url;
+                iaImg.style.display = 'block';
+            } else {
+                alert('No se pudo generar la imagen. Verifica la clave de API.');
+            }
+        } catch(err) {
+            console.error(err);
+            alert('Error al contactar el servicio de IA.');
+        } finally {
+            iaLoad.style.display = 'none';
+        }
+    }
+
+    // ── AGREGAR AL CARRITO ───────────────────────────────────────────────────────────────
+    async function agregarBurgerAlCarrito() {
+        const ids = Object.keys(seleccionados);
+        if (ids.length === 0) { alert('¡Personaliza tu hamburguesa primero!'); return; }
+
+        const btn = document.getElementById('btn-agregar-carrito');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando…';
+
+        // Agregar cada ingrediente al carrito vía los endpoints existentes
+        try {
+            for (const id of ids) {
+                const ing = seleccionados[id];
+                for (let i = 0; i < ing.qty; i++) {
+                    await fetch(`/cliente/agregar/carrito/${id}`);
+                }
+            }
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> ¡Agregado!';
+            btn.style.background = '#24A636';
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-bag-plus"></i> Agregar al carrito';
+                btn.style.background = '';
+                // Recargar para actualizar contador carrito en header
+                window.location.reload();
+            }, 1800);
+        } catch(err) {
+            console.error(err);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-bag-plus"></i> Agregar al carrito';
+            alert('Hubo un error al agregar los productos. Inténtalo de nuevo.');
+        }
+    }
+
+    // ── RESET ────────────────────────────────────────────────────────────────────────────
+    function resetBurger() {
+        Object.keys(seleccionados).forEach(id => {
+            delete seleccionados[id];
+            sincronizarGridQty(id);
+        });
+        renderListaSeleccionados();
+        renderBurgerStack();
+        calcularPrecio();
+        document.getElementById('nombre-burger').value = '';
+        document.getElementById('ia-preview-img').style.display = 'none';
+    }
+
+    // ── INIT ─────────────────────────────────────────────────────────────────────────────
+    calcularPrecio();
+    </script>
+</body>
+</html>

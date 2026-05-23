@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tunea tu Bajada</title>
+    <link rel="shortcut icon" href="/img/estadisticas/img-5.png" type="image/x-icon">
+    <link rel="stylesheet" href="../bootstrap/bootstrap-icons/bootstrap-icons.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/page.css">
+</head>
+
+<body style="background-image: url('/img/bag/faq-bg.png');">
+    <div th:replace="~{/fragmentos/cliente/header :: div}"></div>
+    <!-- nosotros -->
+    <div class="relative">
+        <div>
+            <img src="img/nosotros/blog-2.jpg" alt="">
+            <p class="absolute inset-0 flex justify-center font-bold items-center text-white text-7xl bg-opacity-75 z-10">
+                NOSOTROS</p>
+        </div>
+    </div>
+    <br><br><br>
+    <div class="flex w-full  justify-around flex-wrap">
+        <div class="text-center mt-auto mb-auto ">
+            <h1 class="text-red-700 font-bold  text-3xl">NUESTRA MISION</h1><br>
+            <p class="max-w-96">Redefinir la experiencia de comida rápida ofreciendo a nuestros clientes 
+                la posibilidad de crear hamburguesas personalizadas 
+                completamente únicas. Nos comprometemos a proporcionar 
+                ingredientes frescos y de calidad, un servicio excepcional 
+                y una plataforma tecnológica intuitiva.</p>
+        </div>
+        <div class="text-center mt-auto mb-auto">
+            <h1 class="text-red-700 font-bold text-3xl">NUESTRA VISION</h1><br>
+            <p class="max-w-96">Convertirnos en el destino preferido para los amantes de las hamburguesas, 
+                juntando la tecnología para ofrecer experiencias únicas. Asimismo, expandir nuestra presencia 
+                a nivel nacional y ser reconocidos como líderes en innovación.</p>
+        </div>
+    </div>
+    <br><br>
+    
+    <div class="flex w-full justify-around flex-wrap ">
+        <div class=" text-center mt-auto mb-auto ">
+            <p class="max-w-96 font-serif text-2xl">“En el fogón se conjuran las sangres. En el fogón cantan los pueblos.
+                 En el fogón se funden las historias individuales y colectivas. En el fogón se gesta la vida, se cohesionan
+                  los elementos. En el fogón se promueve el diálogo, se confrontan los elementos, se atraen los opuestos”
+            </p>
+        </div>
+    </div>
+    <br><br> 
+    <br><br> <br><br>   
+    <div th:replace="~{/fragmentos/cliente/footer :: div}"></div>
+
+    <div id="modal_barra_lateral" class="hidden fixed w-screen h-screen flex z-1 top-0  ">
+        <!-- Sidebar -->
+        <div class="w-80 h-full bg-white text-black p-4 border rounded">
+                <div class="flex justify-between">
+                    <a href="/" class="flex gap-2"><img class="w-12" src="/img/estadisticas/img-5.png" alt=""> <span class="mb-auto mt-auto">FameTech</span> </a>
+                    <a id="cerrar_ventana_modal" class="mb-auto mt-auto cursor pointer">X</a>                    
+                </div>
+
+                <div class="font-bold text-xl mt-8">
+                    <a href="/cliente/login" class="block mb-4" th:if="${session.IdUsuario == null}">iniciar sesion</a>
+                    <a href="/cliente/registrar" class="block mb-4" th:if="${session.IdUsuario == null}">registrar</a>
+                    <a href="/" class="block mb-4">inicio</a>
+                    <a href="/cliente/productos" class="block mb-4">productos</a>              
+                    <a href="/nosotros" class="block mb-4">nosotros</a>
+                    <a href="/cliente/compras" class="block mb-4" th:unless="${session.IdUsuario == null}">mis compras</a>
+                </div>
+        </div>       
+    </div>
+    <script>
+        var buttom_barra_lateral = document.getElementById("buttom_barra_lateral");
+        var modal_barra_lateral = document.getElementById("modal_barra_lateral");
+        var cerrar_ventana_modal = document.getElementById("cerrar_ventana_modal");
+
+        buttom_barra_lateral.addEventListener('click', () => {
+            modal_barra_lateral.classList.remove('hidden');
+        });
+
+        cerrar_ventana_modal.addEventListener('click', () => {
+            modal_barra_lateral.classList.add('hidden');
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <link rel="stylesheet" href="../css/main.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tunea tu Bajada</title>
+    <link rel="shortcut icon" href="/img/estadisticas/img-5.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/alerta.css">
+    <link rel="stylesheet" href="../bootstrap/bootstrap-icons/bootstrap-icons.css">
+</head>
+<body  style="background-image: url('/img/bag/faq-bg.png');">
+    <div class="min-h-screen flex justify-center items-center">
+        <form action="/autenticacion/login" method="POST" class=" bg-white w-96 border rounded shadow-xl p-4">
+            <div>
+                <a href="/" class="flex justify-end "><i class="bi bi-arrow-left"> </i> Regresar</a>
+                <h1 class="text-2xl text-orange-700 text-center font-bold mb-2">Inicia Sesión</h1>    
+                <label for="" class="block text-sm">Número de documento</label>
+                <input type="text" class="px-4 py-2 outline-none rounded border w-full text-sm" name="numero_documento" placeholder="Ingrese su número">
+            </div>
+            <div>
+                <label for="" class="block mt-4 text-sm ">Ingrese su contraseña</label>
+                <input type="password" class="px-4 py-2 rounded w-full border outline-none text-sm" name="contrasena" placeholder="Contraseña">
+            </div>
+            <div class="mt-2 flex justify-center gap-2">
+                <input type="submit" class="border rounded bg-orange-700 text-sm font-bold text-white px-4 py-2 cursor-pointer hover:bg-sky-900" value="Iniciar Sesión">
+                <a href="/cliente/registrar" class="border rounded bg-orange-700 text-sm font-bold text-white px-4 py-2.5 cursor-pointer hover:bg-sky-900">Registrarse</a>
+            </div>
+        </form>
+    </div>
+    
+
+    <div class="contenedor_alerta respuestaIncorrecta" id="contenedor_alerta" th:if="${mensajeError != null}">
+        <div class="alerta" id="alerta">
+            <div class="icon_alerta">            
+                <i class="bi bi-check2"></i>
+            </div>            
+            <div>
+                <span th:text="${mensajeError}"></span>       
+            </div>                 
+        </div> 
+        <div class="slider_alerta"></div>            
+    </div>
+    <script>
+        // Function to close the error alert after 3 seconds
+        setTimeout(function () {
+            cerrarErrorAlert();
+        }, 4500);
+
+        // Function to close the error alert
+        function cerrarErrorAlert() {
+            var errorAlerts = document.querySelectorAll('.alerta');
+            for (let error of errorAlerts) {
+                if (error) {
+                    error.style.display = 'none';
+                }
+            }
+        }
+        </script>
+        
+</body>
+</html>
