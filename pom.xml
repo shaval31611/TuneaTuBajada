@@ -11,7 +11,7 @@
 	<groupId>com.web</groupId>
 	<artifactId>restaurante</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>restaurante</name>
 	<description>restaurante</description>
 	<properties>
@@ -80,9 +80,9 @@
     		<version>1.15</version> <!-- Utiliza la última versión disponible -->
 		</dependency>
 		<dependency>
-			<groupId>com.paypal.sdk</groupId>
-			<artifactId>rest-api-sdk</artifactId>
-			<version>1.4.2</version>
+    		<groupId>org.postgresql</groupId>
+    		<artifactId>postgresql</artifactId>
+    		<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.mysql</groupId>
